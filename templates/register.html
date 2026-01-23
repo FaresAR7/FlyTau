@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-xl mx-auto bg-white rounded-2xl shadow p-6">
+  <h1 class="text-xl font-semibold">Create account</h1>
+
+  <form method="post" class="mt-4 space-y-3">
+    <div>
+      <label class="text-sm">Email</label>
+      <input name="email" type="email" required class="mt-1 w-full border rounded-lg px-3 py-2"/>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-sm">First name</label>
+        <input name="first_name" class="mt-1 w-full border rounded-lg px-3 py-2"/>
+      </div>
+      <div>
+        <label class="text-sm">Last name</label>
+        <input name="last_name" class="mt-1 w-full border rounded-lg px-3 py-2"/>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-sm">Passport #</label>
+        <input name="passport" class="mt-1 w-full border rounded-lg px-3 py-2"/>
+      </div>
+      <div>
+        <label class="text-sm">Birthdate</label>
+        <input name="birthdate" type="date" class="mt-1 w-full border rounded-lg px-3 py-2"/>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm">Password</label>
+      <input name="password" type="password" required class="mt-1 w-full border rounded-lg px-3 py-2"/>
+    </div>
+
+    <button class="w-full mt-2 px-4 py-2 rounded-lg bg-slate-900 text-white">Register</button>
+
+    <p class="text-sm text-slate-600 mt-2">
+      Already have an account?
+      <a class="underline" href="{{ url_for('login') }}">Login</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

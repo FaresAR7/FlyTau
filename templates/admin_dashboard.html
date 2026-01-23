@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card stack">
+
+  <div class="spread">
+    <div class="stack" style="gap:6px;">
+      <h2>Admin Dashboard</h2>
+      <p><strong>Welcome, {{ admin_name }}</strong></p>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ===================== Reports ===================== -->
+  <h3>Management Reports</h3>
+
+  <div class="row" style="align-items:stretch;">
+    <div class="card" style="flex:1; min-width:220px; box-shadow:none;">
+      <h4>Revenue (not cancelled)</h4>
+      <div style="font-size:26px; font-weight:900; margin-top:8px;">{{ revenue }}</div>
+      <p style="margin-top:6px;">Sum of active (not cancelled) revenue.</p>
+    </div>
+
+    <div class="card" style="flex:1; min-width:220px; box-shadow:none;">
+      <h4>Cancelled orders</h4>
+      <div style="font-size:26px; font-weight:900; margin-top:8px;">{{ cancelled_cnt }}</div>
+      <p style="margin-top:6px;">Total cancelled orders count.</p>
+    </div>
+  </div>
+
+  <div class="row" style="align-items:flex-start;">
+    <div style="flex:1; min-width:320px;">
+      <h4 style="margin-bottom:10px;">Orders by Status</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Order Status</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in reports_by_status %}
+          <tr>
+            <td>{{ row.OrderStatus }}</td>
+            <td>{{ row.Cnt }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="flex:1; min-width:320px;">
+      <h4 style="margin-bottom:10px;">Flights by Status</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Flight Status</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in flights_by_status %}
+          <tr>
+            <td>{{ r.StatusF }}</td>
+            <td>{{ r.Cnt }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top:10px;">
+    <h4 style="margin-bottom:10px;">Revenue by Class</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in revenue_by_class %}
+        <tr>
+          <td>{{ r.ClassType }}</td>
+          <td>{{ r.Revenue or 0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <!-- ===================== Cancel Order ===================== -->
+  <h3>Cancel Order (Whole Order)</h3>
+  <p>
+    Rule: Managers can cancel only up to <strong>72 hours</strong> before departure.
+    Refund is full (TotalPrice becomes 0).
+  </p>
+
+  <form method="POST" action="{{ url_for('admin_cancel_order_route') }}" class="row">
+    <div style="min-width:260px; flex:0 0 320px;">
+      <label>Order ID</label>
+      <input type="number" name="order_id" required>
+    </div>
+    <div style="align-self:end;">
+      <button type="submit">Cancel Order (72h rule)</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <!-- ===================== Flights ===================== -->
+  <details>
+    <summary>Flights</summary>
+    <div class="stack" style="margin-top:12px;">
+
+      <div class="spread">
+        <h3>All Flights</h3>
+        <form method="GET" action="{{ url_for('admin_dashboard') }}" class="row">
+          {% set fs = (flight_status or 'All') %}
+          <div style="min-width:220px;">
+            <label>Filter by status</label>
+            <select name="flight_status">
+              <option value="All" {{ 'selected' if fs == 'All' else '' }}>All</option>
+              <option value="Active" {{ 'selected' if fs == 'Active' else '' }}>Active</option>
+              <option value="Full" {{ 'selected' if fs == 'Full' else '' }}>Full</option>
+              <option value="Arrived" {{ 'selected' if fs == 'Arrived' else '' }}>Arrived</option>
+              <option value="Canceled" {{ 'selected' if fs == 'Canceled' else '' }}>Canceled</option>
+            </select>
+          </div>
+          <div style="align-self:end;">
+            <button type="submit">Apply</button>
+          </div>
+        </form>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Flight</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Dep Date</th>
+            <th>Dep Time</th>
+            <th>Arrives</th>
+            <th>Status</th>
+            <th>Tail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in flights %}
+          <tr>
+            <td>{{ f.FlightNum }}</td>
+            <td>{{ f.SourceAirport }}</td>
+            <td>{{ f.DestAirport }}</td>
+            <td>{{ f.DepartureDate }}</td>
+            <td>{{ f.DepartureTime }}</td>
+            <td>{{ f.ArrivalDateTime }}</td>
+            <td>{{ f.StatusF }}</td>
+            <td>{{ f.TailNum }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </details>
+
+  <hr>
+
+  <!-- ===================== Aircrafts (Add only) ===================== -->
+  <details>
+    <summary>Aircrafts</summary>
+    <div class="stack" style="margin-top:12px;">
+      <h3>Add Aircraft (creates layout automatically)</h3>
+
+      <form method="POST" action="{{ url_for('admin_create_aircraft_route') }}" class="form-grid">
+        <div>
+          <label>Tail Number</label>
+          <input type="text" name="tail_num" required>
+        </div>
+
+        <div>
+          <label>Manufacturer</label>
+          <select name="manufacturer" required>
+            <option value="Boeing">Boeing</option>
+            <option value="Airbus">Airbus</option>
+            <option value="Dassault">Dassault</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Size</label>
+          <select name="size" id="aircraft_size" required>
+            <option value="Small">Small</option>
+            <option value="Large">Large</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Purchase Date</label>
+          <input type="date" name="purchase_date" required>
+        </div>
+
+        <div>
+          <label>Layout (Economy) Rows</label>
+          <input type="number" name="econ_rows" min="1" required>
+        </div>
+
+        <div>
+          <label>Layout (Economy) Cols</label>
+          <input type="number" name="econ_cols" min="1" required>
+        </div>
+
+        <div id="business_layout_block">
+          <label>Layout (Business) Rows</label>
+          <input type="number" name="bus_rows" id="bus_rows" min="0" required>
+        </div>
+
+        <div id="business_layout_block2">
+          <label>Layout (Business) Cols</label>
+          <input type="number" name="bus_cols" id="bus_cols" min="0" required>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <p style="margin:0;">If you don’t have Business class, set Business rows/cols to 0.</p>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <button type="submit">Add Aircraft + Create Layout</button>
+        </div>
+      </form>
+
+      <script>
+        // Small aircraft: force Business layout to 0 and hide those inputs (rule: no business on small)
+        (function () {
+          const sizeSel = document.getElementById("aircraft_size");
+          const block1 = document.getElementById("business_layout_block");
+          const block2 = document.getElementById("business_layout_block2");
+          const rows = document.getElementById("bus_rows");
+          const cols = document.getElementById("bus_cols");
+
+          function sync() {
+            const isSmall = (sizeSel.value === "Small");
+            block1.style.display = isSmall ? "none" : "block";
+            block2.style.display = isSmall ? "none" : "block";
+            rows.disabled = isSmall;
+            cols.disabled = isSmall;
+            if (isSmall) { rows.value = 0; cols.value = 0; }
+          }
+
+          sizeSel.addEventListener("change", sync);
+          sync();
+        })();
+      </script>
+    </div>
+  </details>
+
+  <hr>
+
+  <!-- ===================== Create New Flight ===================== -->
+  <details>
+    <summary>Create New Flight</summary>
+    <div class="stack" style="margin-top:12px;">
+
+      <h3>Create New Flight</h3>
+
+      <div class="card" style="box-shadow:none;">
+        <h4>Pre-check (load relevant aircraft & crew)</h4>
+
+        <form method="GET" action="{{ url_for('admin_dashboard') }}" class="row" style="align-items:end;">
+          <input type="hidden" name="flight_status" value="{{ flight_status }}">
+
+          <div style="min-width:260px;">
+            <label>Route</label>
+            <select name="new_route_id" required>
+              {% for r in routes %}
+                <option value="{{ r.RouteID }}"
+                        {% if (new_route_id|default('')|string) == (r.RouteID|string) %}selected{% endif %}>
+                  {{ r.RouteID }} – {{ r.SourceAirport }} → {{ r.DestAirport }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div style="min-width:220px;">
+            <label>Departure Date</label>
+            <input type="date" name="new_dep_date" value="{{ new_dep_date or '' }}" required>
+          </div>
+
+          <div style="min-width:220px;">
+            <label>Departure Time</label>
+            <input type="time" name="new_dep_time" value="{{ new_dep_time or '' }}" required>
+          </div>
+
+          <div>
+            <button type="submit">Load relevant options</button>
+          </div>
+        </form>
+
+        {% if precheck_error %}
+          <div class="flash error" style="margin-top:10px;">{{ precheck_error }}</div>
+        {% endif %}
+
+        <p style="margin-top:10px;">
+          <b>Crew rule:</b> Small aircraft = 2 pilots + 3 attendants, Large aircraft = 3 pilots + 6 attendants.
+        </p>
+      </div>
+
+      {% if aircrafts and pilots and attendants and new_route_id and new_dep_date and new_dep_time and not precheck_error %}
+      <form method="POST" action="{{ url_for('admin_create_flight_route') }}" class="card stack" style="box-shadow:none;">
+
+        <div class="form-grid">
+          <div>
+            <label>Flight Number</label>
+            <input type="text" name="flight_num" required>
+          </div>
+
+          <div>
+            <label>Route</label>
+            <select name="route_id" required>
+              {% for r in routes %}
+                <option value="{{ r.RouteID }}"
+                        {% if (new_route_id|default('')|string) == (r.RouteID|string) %}selected{% endif %}>
+                  {{ r.RouteID }} – {{ r.SourceAirport }} → {{ r.DestAirport }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label>Aircraft</label>
+            <select name="tail_num" id="tail_num" required>
+              {% for a in aircrafts %}
+                <option value="{{ a.TailNum }}" data-size="{{ a.Size }}">
+                  {{ a.TailNum }} – {{ a.Size }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label>Departure Date</label>
+            <input type="date" name="departure_date" value="{{ new_dep_date or '' }}" required>
+          </div>
+
+          <div>
+            <label>Departure Time</label>
+            <input type="time" name="departure_time" value="{{ new_dep_time or '' }}" required>
+          </div>
+        </div>
+
+        <hr>
+
+        <h4>Pricing</h4>
+        <div class="form-grid">
+          <div>
+            <label>Economy Price</label>
+            <input type="number" step="0.01" name="econ_price" required>
+          </div>
+
+          <div id="business_price_wrap">
+            <label>Business Price</label>
+            <input type="number" step="0.01" name="bus_price" id="bus_price">
+            <p style="margin-top:6px;">Business is available only for Large aircraft.</p>
+          </div>
+        </div>
+
+        <p id="crew_hint" style="margin-top:8px;"></p>
+
+        <script>
+          function updateBusinessVisibilityAndCrewHint() {
+            const sel = document.getElementById("tail_num");
+            if (!sel) return;
+            const opt = sel.options[sel.selectedIndex];
+            const size = (opt.getAttribute("data-size") || "").toLowerCase();
+
+            const wrap = document.getElementById("business_price_wrap");
+            const busInput = document.getElementById("bus_price");
+            const hint = document.getElementById("crew_hint");
+
+            const isSmall = (size === "small");
+            wrap.style.display = isSmall ? "none" : "block";
+            busInput.disabled = isSmall;
+            if (isSmall) busInput.value = "";
+
+            hint.textContent = isSmall
+              ? "Selected aircraft is Small → choose exactly 2 pilots + 3 attendants."
+              : "Selected aircraft is Large → choose exactly 3 pilots + 6 attendants.";
+          }
+          document.getElementById("tail_num").addEventListener("change", updateBusinessVisibilityAndCrewHint);
+          updateBusinessVisibilityAndCrewHint();
+        </script>
+
+        <hr>
+
+        <h4>Select Pilots</h4>
+        <div class="multi-list">
+          {% for p in pilots %}
+          <label class="multi-item">
+            <input type="checkbox" name="pilot_ids" value="{{ p.EmployeeID }}">
+            <span>
+              {{ p.EmployeeID }} – {{ p.FirstNameHebrew }} {{ p.LastNameHebrew }}
+              {% if p.IsLongHaulQualified %}(LongHaul){% endif %}
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <h4>Select Attendants</h4>
+        <div class="multi-list">
+          {% for a in attendants %}
+          <label class="multi-item">
+            <input type="checkbox" name="attendant_ids" value="{{ a.EmployeeID }}">
+            <span>
+              {{ a.EmployeeID }} – {{ a.FirstNameHebrew }} {{ a.LastNameHebrew }}
+              {% if a.IsLongHaulQualified %}(LongHaul){% endif %}
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <div>
+          <button type="submit">Create Flight</button>
+        </div>
+
+      </form>
+      {% else %}
+        <p>Please run the pre-check above (Route + Date + Time) to load suitable aircraft and crew.</p>
+      {% endif %}
+
+    </div>
+  </details>
+
+  <hr>
+
+  <!-- ===================== Change Flight Status ===================== -->
+  <details>
+    <summary>Change Flight Status</summary>
+    <div class="stack" style="margin-top:12px;">
+      <p>Note: Setting status to <b>Canceled</b> will auto-cancel ALL orders on this flight.</p>
+
+      <form method="POST" action="{{ url_for('admin_flight_status_route') }}"
+            onsubmit="const s = document.querySelector('select[name=status]').value; return (s !== 'Canceled') || confirm('Cancel flight and auto-cancel ALL related orders?');"
+            class="row" style="align-items:end;">
+
+        <div style="min-width:240px;">
+          <label>Flight Number</label>
+          <input type="text" name="flight_num" required>
+        </div>
+
+        <div style="min-width:220px;">
+          <label>Status</label>
+          <select name="status">
+            <option value="Active">Active</option>
+            <option value="Full">Full</option>
+            <option value="Arrived">Arrived</option>
+            <option value="Canceled">Canceled</option>
+          </select>
+        </div>
+
+        <div>
+          <button type="submit">Update Status</button>
+        </div>
+      </form>
+
+    </div>
+  </details>
+
+</div>
+
+{% endblock %}

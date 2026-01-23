@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="he">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}FlyTau{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+<header>
+  <a href="{{ url_for('home_page') }}">
+    <img src="{{ url_for('static', filename='images/Logo.png') }}"
+         alt="FlyTau Logo"
+         class="header-logo">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('home_page') }}">Home</a>
+    <a href="{{ url_for('flights_search') }}">Flights</a>
+    <a href="{{ url_for('guest_tickets') }}">Guest Tickets</a>
+
+    {% if session.get('user_email') %}
+      <a href="{{ url_for('orders_history') }}">My Orders</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+
+    {% if session.get('admin_id') %}
+      <a href="{{ url_for('admin_dashboard') }}" class="admin-highlight">Admin Panel</a>
+      <a href="{{ url_for('admin_logout') }}">Admin Logout</a>
+    {% else %}
+      <a href="{{ url_for('admin_login') }}">Admin Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

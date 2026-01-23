@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow p-6">
+  <h1 class="text-2xl font-semibold">My Orders</h1>
+
+  <div class="mt-4 flex flex-wrap gap-2 text-sm">
+    <a class="px-3 py-2 rounded-lg {% if not status %}bg-slate-900 text-white{% else %}bg-slate-100{% endif %}"
+       href="{{ url_for('orders_history') }}">All</a>
+
+    {% for s in ['Active','Paid','CustCancelled','SysCancelled'] %}
+      <a class="px-3 py-2 rounded-lg {% if status == s %}bg-slate-900 text-white{% else %}bg-slate-100{% endif %}"
+         href="{{ url_for('orders_history', status=s) }}">{{ s }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="mt-5 overflow-auto">
+    <table class="w-full text-sm border">
+      <thead class="bg-slate-100">
+        <tr>
+          <th class="p-2 border">OrderID</th>
+          <th class="p-2 border">OrderDate</th>
+          <th class="p-2 border">Status</th>
+          <th class="p-2 border">TotalPrice</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if orders|length == 0 %}
+          <tr><td colspan="4" class="p-4 text-center text-slate-600">No orders found.</td></tr>
+        {% else %}
+          {% for o in orders %}
+            <tr>
+              <td class="p-2 border">{{ o.OrderID }}</td>
+              <td class="p-2 border">{{ o.OrderDate }}</td>
+              <td class="p-2 border">{{ o.OrderStatus }}</td>
+              <td class="p-2 border">₪{{ "%.2f"|format(o.TotalPrice) }}</td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

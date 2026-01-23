@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card stack">
+  <div class="spread">
+    <div class="stack" style="gap:8px; max-width:720px;">
+      <h2>Welcome to FlyTau</h2>
+      <p>
+        Guests can search flights, book with seat selection, and view active tickets using OrderID + Email.
+        Registered customers also see order history.
+      </p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row" style="align-items:stretch;">
+    <div class="card" style="flex:1; min-width:260px; box-shadow:none;">
+      <h3>Search Flights</h3>
+      <p>Find flights by date + source + destination.</p>
+      <div style="margin-top:12px;">
+        <a class="btn" href="{{ url_for('flights_search') }}">Search</a>
+      </div>
+    </div>
+
+    <div class="card" style="flex:1; min-width:260px; box-shadow:none;">
+      <h3>Guest Tickets</h3>
+      <p>View tickets with OrderID + Email, and cancel if allowed.</p>
+      <div style="margin-top:12px;">
+        <a class="btn" href="{{ url_for('guest_tickets') }}">Open</a>
+      </div>
+    </div>
+
+    <div class="card" style="flex:1; min-width:260px; box-shadow:none;">
+      <h3>Registered Customers</h3>
+      <p>Login to get history + auto-filled personal details.</p>
+      <div class="row" style="margin-top:12px;">
+        <a class="btn" href="{{ url_for('login') }}">Login</a>
+        <a class="btn secondary" href="{{ url_for('register') }}">Register</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

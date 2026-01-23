@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow p-6">
+  <h1 class="text-2xl font-semibold">Guest Tickets</h1>
+  <p class="mt-2 text-slate-600 text-sm">
+    Enter your <b>OrderID</b> (booking code) and email to view tickets.
+  </p>
+
+  <form method="post" class="mt-4 grid md:grid-cols-3 gap-3 items-end">
+    <div>
+      <label class="text-sm">Email</label>
+      <input name="email" type="email" required class="mt-1 w-full border rounded-lg px-3 py-2"/>
+    </div>
+    <div>
+      <label class="text-sm">Booking code (OrderID)</label>
+      <input name="booking_code" required class="mt-1 w-full border rounded-lg px-3 py-2"/>
+    </div>
+    <button class="px-4 py-2 rounded-lg bg-slate-900 text-white">Find</button>
+  </form>
+
+  {% if order %}
+    <div class="mt-6 border rounded-xl p-4 bg-slate-50">
+      <p class="text-sm"><span class="font-semibold">OrderID:</span> {{ order.OrderID }}</p>
+      <p class="text-sm"><span class="font-semibold">Status:</span> {{ order.OrderStatus }}</p>
+      <p class="text-sm"><span class="font-semibold">TotalPrice:</span> ₪{{ "%.2f"|format(order.TotalPrice) }}</p>
+      <p class="text-xs text-slate-500 mt-2">
+        Cancellation is allowed only if more than 36 hours before departure and only for the entire order.
+      </p>
+    </div>
+  {% endif %}
+
+  {% if tickets %}
+    <h2 class="font-semibold mt-6">Tickets</h2>
+    <div class="mt-2 overflow-auto">
+      <table class="w-full text-sm border">
+        <thead class="bg-slate-100">
+          <tr>
+            <th class="p-2 border">TicketID</th>
+            <th class="p-2 border">Flight</th>
+            <th class="p-2 border">Class</th>
+            <th class="p-2 border">Seat</th>
+            <th class="p-2 border">Passenger</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+            <tr>
+              <td class="p-2 border">{{ t.TicketID }}</td>
+              <td class="p-2 border">{{ t.FlightNum }}</td>
+              <td class="p-2 border">{{ t.ClassType }}</td>
+              <td class="p-2 border">{{ t.SeatRow }}{{ t.SeatCol }}</td>
+              <td class="p-2 border">{{ t.PassengerName }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" action="{{ url_for('cancel_order_route') }}" class="mt-4">
+      <!-- user must re-enter email and code to cancel -->
+      <input type="hidden" name="email" value="{{ request.form.get('email','') }}"/>
+      <input type="hidden" name="booking_code" value="{{ order.OrderID }}"/>
+
+      <button class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm">
+        Cancel entire order (5% fee)
+      </button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

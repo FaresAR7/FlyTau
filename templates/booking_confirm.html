@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow p-6">
+  <h1 class="text-2xl font-semibold">Booking confirmed ✅</h1>
+
+  <div class="mt-4 border rounded-xl p-4 bg-slate-50">
+    <p class="text-sm"><span class="font-semibold">Booking code:</span> {{ order.OrderID }} (OrderID)</p>
+    <p class="text-sm"><span class="font-semibold">Email:</span> {{ email }}</p>
+    <p class="text-sm"><span class="font-semibold">Status:</span> {{ order.OrderStatus }}</p>
+    <p class="text-sm"><span class="font-semibold">Total price:</span> ₪{{ "%.2f"|format(order.TotalPrice) }}</p>
+    <p class="text-xs text-slate-500 mt-2">
+      Guests can view this order using OrderID + Email in "Guest Tickets".
+    </p>
+  </div>
+
+  <h2 class="font-semibold mt-6">Tickets</h2>
+  <div class="mt-2 overflow-auto">
+    <table class="w-full text-sm border">
+      <thead class="bg-slate-100">
+        <tr>
+          <th class="p-2 border">TicketID</th>
+          <th class="p-2 border">Flight</th>
+          <th class="p-2 border">Class</th>
+          <th class="p-2 border">Seat</th>
+          <th class="p-2 border">Passenger</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+          <tr>
+            <td class="p-2 border">{{ t.TicketID }}</td>
+            <td class="p-2 border">{{ t.FlightNum }}</td>
+            <td class="p-2 border">{{ t.ClassType }}</td>
+            <td class="p-2 border">{{ t.SeatRow }}{{ t.SeatCol }}</td>
+            <td class="p-2 border">{{ t.PassengerName }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-6 flex gap-2">
+    <a class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm" href="{{ url_for('flights_search') }}">Book more</a>
+    <a class="px-4 py-2 rounded-lg bg-slate-100 text-slate-900 text-sm" href="{{ url_for('guest_tickets') }}">Guest tickets</a>
+  </div>
+</div>
+{% endblock %}

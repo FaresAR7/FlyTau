@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card stack">
+
+  <div class="stack" style="gap:6px;">
+    <h2>Book Flight {{ flight.FlightNum }}</h2>
+    <p>
+      <b>From:</b> {{ flight.SourceAirport }} |
+      <b>To:</b> {{ flight.DestAirport }} |
+      <b>Date:</b> {{ flight.DepartureDate }} |
+      <b>Time:</b> {{ flight.DepartureTime }}
+    </p>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <hr>
+
+  <!-- ===================== FORM A (GET): Update seats / refresh grid ===================== -->
+  <div class="card" style="box-shadow:none;">
+    <h3 style="margin-bottom:10px;">Choose class & number of tickets</h3>
+
+    <form method="GET" action="{{ url_for('book_flight', flight_num=flight.FlightNum) }}" class="form-grid">
+      <div>
+        <label>Class</label>
+        <select name="class_type">
+          {% for cls, price in pricing.items() %}
+            <option value="{{ cls }}" {{ 'selected' if cls == class_type else '' }}>
+              {{ cls }} ({{ price }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Number of tickets</label>
+        <input
+          type="number"
+          name="qty"
+          value="{{ qty }}"
+          min="1"
+          max="{{ available_count if available_count > 0 else 1 }}"
+          required
+        >
+        <p style="margin-top:6px;">
+          Available seats in {{ class_type }}: <b>{{ available_count }}</b>
+        </p>
+      </div>
+
+      <div style="align-self:end;">
+        <button type="submit">Update seats</button>
+      </div>
+    </form>
+
+    {% if available_count == 0 %}
+      <div class="flash error" style="margin-top:10px;">
+        <b>No available seats in {{ class_type }}.</b>
+      </div>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  <!-- ===================== FORM B (POST): Confirm booking ===================== -->
+  <form method="POST" class="stack" style="gap:14px;">
+
+    <!-- keep chosen class/qty for POST -->
+    <input type="hidden" name="class_type" value="{{ class_type }}">
+    <input type="hidden" name="qty" value="{{ qty }}">
+
+    <div class="card" style="box-shadow:none;">
+      <h3 style="margin-bottom:10px;">Passenger details</h3>
+
+      <label>Passenger name</label>
+      <input type="text" name="passenger_name" value="{{ user_name if is_logged_in else '' }}">
+
+      {% if not is_logged_in %}
+        <hr>
+        <h3 style="margin-bottom:10px;">Guest details</h3>
+
+        <div class="form-grid">
+          <div>
+            <label>Email</label>
+            <input type="email" name="guest_email" required>
+          </div>
+          <div>
+            <label>First name</label>
+            <input type="text" name="guest_first" required>
+          </div>
+          <div>
+            <label>Last name</label>
+            <input type="text" name="guest_last" required>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card" style="box-shadow:none;">
+      <div class="stack" style="gap:6px;">
+        <h3>Select seats ({{ class_type }})</h3>
+        <p><b>Select exactly {{ qty }} seats</b></p>
+      </div>
+
+      <!-- Seat tiles grid -->
+      <div class="seat-grid" style="--seat-cols: {{ cols|length }};">
+        {% for r in range(1, num_rows + 1) %}
+          {% for c in cols %}
+            {% set seat_id = r ~ "-" ~ c %}
+
+            {% if seat_id in occupied %}
+              <div class="seat-tile taken" aria-disabled="true">
+                <div class="seat-box">{{ c }}{{ r }}</div>
+              </div>
+            {% else %}
+              <label style="position:relative;">
+                <input type="checkbox" name="seats" value="{{ seat_id }}">
+                <div class="seat-tile available">
+                  <div class="seat-box">{{ c }}{{ r }}</div>
+                </div>
+              </label>
+            {% endif %}
+
+          {% endfor %}
+        {% endfor %}
+      </div>
+
+      <div style="margin-top:14px;">
+        <button type="submit" name="action" value="confirm">Confirm Booking</button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  // Enforce: select exactly {{ qty }} seats
+  (function () {
+    const maxSeats = parseInt("{{ qty }}", 10) || 1;
+    const boxes = document.querySelectorAll('input[name="seats"]');
+
+    function enforce() {
+      const checked = Array.from(boxes).filter(b => b.checked);
+      if (checked.length > maxSeats) {
+        checked[checked.length - 1].checked = false;
+        alert("Select exactly " + maxSeats + " seats.");
+      }
+    }
+
+    boxes.forEach(b => b.addEventListener("change", enforce));
+  })();
+</script>
+
+{% endblock %}
