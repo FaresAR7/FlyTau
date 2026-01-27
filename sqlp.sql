@@ -3,7 +3,7 @@ CREATE DATABASE FlyTau;
 USE FlyTau;
 
 -- ==========================================
--- 1. STAFF TABLES (Attributes moved here)
+-- 1. STAFF TABLES
 -- ==========================================
 
 CREATE TABLE Managers (
@@ -63,7 +63,7 @@ CREATE TABLE RegisteredCustomers (
 );
 
 -- ==========================================
--- 3. PHONE TABLES (Split to avoid errors)
+-- 3. PHONE TABLES 
 -- ==========================================
 
 CREATE TABLE GuestPhones (
@@ -81,7 +81,7 @@ CREATE TABLE RegisteredPhones (
 );
 
 -- ==========================================
--- 4. AIRCRAFT & FLIGHTS (Standard)
+-- 4. AIRCRAFT & FLIGHTS
 -- ==========================================
 
 CREATE TABLE Aircrafts (
@@ -130,7 +130,7 @@ CREATE TABLE FlightPricing (
 );
 
 -- ==========================================
--- 5. CREW ASSIGNMENTS (Split to link correctly)
+-- 5. CREW ASSIGNMENTS 
 -- ==========================================
 
 -- Table specifically for Pilots on a flight
@@ -152,7 +152,7 @@ CREATE TABLE CrewAttendants (
 );
 
 -- ==========================================
--- 6. ORDERS & TICKETS (The smart fix)
+-- 6. ORDERS & TICKETS 
 -- ==========================================
 
 CREATE TABLE Orders (
@@ -310,7 +310,7 @@ INSERT INTO FlightPricing VALUES
 ('FL004','Business',1600);
 
 -- =====================================================
--- 9. CREW ASSIGNMENT (NO OVERLAPS)
+-- 9. CREW ASSIGNMENT 
 -- =====================================================
 -- short chain
 INSERT INTO CrewPilots VALUES
@@ -333,7 +333,7 @@ INSERT INTO CrewAttendants VALUES
 ('FL004',2004),('FL004',2005),('FL004',2006);
 
 -- =====================================================
--- 10. ORDERS (ALL SCENARIOS)
+-- 10. ORDERS
 -- =====================================================
 INSERT INTO Orders VALUES
 (1,'guest1@mail.com',NULL,NOW(),280,'Paid'),
@@ -353,8 +353,8 @@ INSERT INTO Tickets VALUES
 SET FOREIGN_KEY_CHECKS = 1;
 
 /* =========================================================
-   ADD MORE DATA (append after your current INSERTs)
-   ========================================================= */
+   ADD MORE DATA 
+   ========================================================= 
 
 #USE FlyTau;
 
@@ -372,8 +372,6 @@ INSERT INTO Pilots VALUES
 
 -- =====================================================
 -- B) ADD MORE FLIGHT ATTENDANTS
---    IMPORTANT: you currently have only 3 long-haul attendants (2001-2003)
---    Long flights need 6 attendants => we add MORE long-haul attendants here.
 -- =====================================================
 INSERT INTO FlightAttendants VALUES
 -- add long-haul qualified attendants
